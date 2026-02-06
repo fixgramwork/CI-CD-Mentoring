@@ -1,0 +1,5 @@
+spring:
+  application:
+    name: CICD-Practice
+server:
+  port: 8081
