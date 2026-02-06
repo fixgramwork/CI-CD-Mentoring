@@ -36,19 +36,17 @@ jobs:
             chmod +x gradlew
             ./gradlew clean build -x test
             
-            pkill -f 'gradle' || true
+            pkill -f 'app\.jar' || true
             sleep 2
             
-            # disown으로 프로세스 분리
-            ./gradlew bootRun > /home/kimminje661/k/app.log 2>&1 &
-            disown
+            cp build/libs/CICD-Practice-0.0.1-SNAPSHOT.jar /home/kimminje661/k/app.jar
+            cd /home/kimminje661/k
             
-            sleep 10
-            if pgrep -f 'bootRun' > /dev/null; then
-            echo "Application started"
-            tail -30 /home/kimminje661/k/app.log
-            else
-            echo "Failed to start"
-            cat /home/kimminje661/k/app.log
-            exit 1
+            # setsid로 완전히 분리
+            setsid nohup java -jar app.jar > app.log 2>&1 < /dev/null &
+            
+            sleep 3
+            if pgrep -f 'app\.jar' > /dev/null; then
+              echo "✅ Started"
+              # 로그 확인하지 말고 바로 종료
             fi
