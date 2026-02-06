@@ -29,6 +29,8 @@ jobs:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_KEY }}
+          timeout: 5m
+          command_timeout: 10m
           script: |
             cd /home/kimminje661/k/source
             
