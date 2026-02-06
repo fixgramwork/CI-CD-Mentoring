@@ -33,7 +33,7 @@ jobs:
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_KEY }}
           source: build/libs/*.jar
-          target: /home/ubuntu/app
+          target: /home/kimminje661/k
 
       - name: Restart Spring Server
         uses: appleboy/ssh-action@v1.0.3
