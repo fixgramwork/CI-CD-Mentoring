@@ -32,7 +32,7 @@ jobs:
           timeout: 5m
           command_timeout: 10m
           script: |
-            cd /home/kimminje661/k
+            cd /home/kimminje661/k/source
             
             # 기존 컨테이너 정리
             docker compose down
