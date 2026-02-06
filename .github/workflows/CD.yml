@@ -33,31 +33,21 @@ jobs:
           command_timeout: 10m
           script: |
             cd /home/kimminje661/k/source
-            
-            # 실행 권한 부여
             chmod +x gradlew
-            
-            # 빌드
             ./gradlew clean build -x test
             
-            # 기존 프로세스 종료
-            pkill -f 'CICD-Practice.*\.jar' || true
+            pkill -f 'gradle' || true
             sleep 2
             
-            # jar 파일을 실행 디렉토리로 복사
-            cp build/libs/CICD-Practice-0.0.1-SNAPSHOT.jar /home/kimminje661/k/app.jar
+            # bootRun을 백그라운드로
+            nohup ./gradlew bootRun > /home/kimminje661/k/app.log 2>&1 &
             
-            # 실행
-            cd /home/kimminje661/k
-            ./gradlew bootRun
-            
-            # 시작 확인
-            sleep 5
-            if pgrep -f 'app.jar' > /dev/null; then
-              echo "Application started successfully"
-              tail -30 app.log
+            sleep 10
+            if pgrep -f 'bootRun' > /dev/null; then
+              echo "Application started"
+              tail -30 /home/kimminje661/k/app.log
             else
-              echo "Application failed to start"
-              cat app.log
+              echo "Failed to start"
+              cat /home/kimminje661/k/app.log
               exit 1
             fi
