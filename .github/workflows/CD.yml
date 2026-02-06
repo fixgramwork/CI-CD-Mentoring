@@ -49,7 +49,7 @@ jobs:
             
             # 실행
             cd /home/kimminje661/k
-            nohup java -jar app.jar > app.log 2>&1 &
+            ./gradlew bootRun
             
             # 시작 확인
             sleep 5
