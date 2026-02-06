@@ -32,21 +32,26 @@ jobs:
           timeout: 5m
           command_timeout: 10m
           script: |
-            cd /home/kimminje661/k/source
-            chmod +x gradlew
-            ./gradlew clean build -x test
-            
-            pkill -f 'app\.jar' || true
-            sleep 2
-            
-            cp build/libs/CICD-Practice-0.0.1-SNAPSHOT.jar /home/kimminje661/k/app.jar
             cd /home/kimminje661/k
             
-            # setsid로 완전히 분리
-            setsid nohup java -jar app.jar > app.log 2>&1 < /dev/null &
+            # 기존 컨테이너 정리
+            docker compose down
             
-            sleep 3
-            if pgrep -f 'app\.jar' > /dev/null; then
-              echo "✅ Started"
-              # 로그 확인하지 말고 바로 종료
+            # 새로 빌드 및 실행
+            docker compose up -d --build
+            
+            # 컨테이너 시작 대기
+            sleep 10
+            
+            # 상태 확인
+            docker compose ps
+            docker compose logs --tail=50
+            
+            # 헬스체크
+            if docker compose ps | grep -q "Up"; then
+              echo "✅ Container is running"
+            else
+              echo "❌ Container failed to start"
+              docker compose logs
+              exit 1
             fi
