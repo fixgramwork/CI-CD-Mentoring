@@ -36,18 +36,20 @@ jobs:
             chmod +x gradlew
             ./gradlew clean build -x test
             
-            pkill -f 'gradle' || true
+            pkill -f 'app\.jar' || true
             sleep 2
             
-            # bootRun을 백그라운드로
-            nohup ./gradlew bootRun > /home/kimminje661/k/app.log 2>&1 &
+            cp build/libs/CICD-Practice-0.0.1-SNAPSHOT.jar /home/kimminje661/k/app.jar
+            cd /home/kimminje661/k
             
-            sleep 10
-            if pgrep -f 'bootRun' > /dev/null; then
-              echo "Application started"
-              tail -30 /home/kimminje661/k/app.log
+            nohup java -jar app.jar > app.log 2>&1 &
+            
+            sleep 5
+            if pgrep -f 'app\.jar' > /dev/null; then
+              echo "✅ Application started successfully"
+              tail -30 app.log
             else
-              echo "Failed to start"
-              cat /home/kimminje661/k/app.log
+              echo "❌ Application failed to start"
+              cat app.log
               exit 1
             fi
