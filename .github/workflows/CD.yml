@@ -13,56 +13,47 @@ jobs:
       - name: Checkout source
         uses: actions/checkout@v4
         
-      - name: Set up JDK 17
-        uses: actions/setup-java@v4
-        with:
-          distribution: temurin
-          java-version: 17
-          
-      - name: Grant execute permission for gradlew
-        run: chmod +x gradlew
-        
-      - name: Build Spring Boot
-        run: ./gradlew clean build -x test
-        
-      - name: Copy jar to server
+      - name: Copy source to server
         uses: appleboy/scp-action@v0.1.7
         with:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_KEY }}
-          source: build/libs/CICD-Practice-0.0.1-SNAPSHOT.jar
-          target: /home/kimminje661/k
-          strip_components: 2  # build/libs/ 제거
+          source: "."
+          target: /home/kimminje661/k/source
+          rm: true  # 기존 파일 삭제 후 복사
           
-      - name: Restart Spring Server
+      - name: Build and Restart on Server
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_KEY }}
           script: |
-            cd /home/kimminje661/k
+            cd /home/kimminje661/k/source
             
-            # 기존 프로세스 종료 (더 정확한 매칭)
+            # 실행 권한 부여
+            chmod +x gradlew
+            
+            # 빌드
+            ./gradlew clean build -x test
+            
+            # 기존 프로세스 종료
             pkill -f 'CICD-Practice.*\.jar' || true
             sleep 2
             
-            # jar 파일 확인
-            if [ ! -f "CICD-Practice-0.0.1-SNAPSHOT.jar" ]; then
-              echo "Error: jar file not found"
-              ls -la
-              exit 1
-            fi
+            # jar 파일을 실행 디렉토리로 복사
+            cp build/libs/CICD-Practice-0.0.1-SNAPSHOT.jar /home/kimminje661/k/app.jar
             
             # 실행
-            nohup java -jar CICD-Practice-0.0.1-SNAPSHOT.jar > app.log 2>&1 &
+            cd /home/kimminje661/k
+            nohup java -jar app.jar > app.log 2>&1 &
             
             # 시작 확인
-            sleep 3
-            if pgrep -f 'CICD-Practice.*\.jar' > /dev/null; then
+            sleep 5
+            if pgrep -f 'app.jar' > /dev/null; then
               echo "Application started successfully"
-              tail -20 app.log
+              tail -30 app.log
             else
               echo "Application failed to start"
               cat app.log
