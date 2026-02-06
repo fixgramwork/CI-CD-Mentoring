@@ -1,6 +1,6 @@
 name: Spring Boot CD
 
-# 실행 조건
+# 실행 조건1
 on:
   push:
     branches:
