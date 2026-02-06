@@ -1,4 +1,4 @@
-package java.cicdpractice.controller.dto;
+package com.cicdpractice.controller.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
